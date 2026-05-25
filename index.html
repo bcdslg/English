@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>儿童英语单词卡 - 家中物品</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f4ff;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        /* === Header Banner === */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 28px 20px 22px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -20%;
+            width: 60%;
+            height: 200%;
+            background: rgba(255,255,255,0.06);
+            border-radius: 50%;
+            transform: rotate(-12deg);
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: -30%;
+            right: -15%;
+            width: 50%;
+            height: 160%;
+            background: rgba(255,255,255,0.04);
+            border-radius: 50%;
+            transform: rotate(8deg);
+        }
+        .hero h1 {
+            color: white;
+            font-size: 1.6rem;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            position: relative;
+            z-index: 1;
+        }
+        .hero p {
+            color: rgba(255,255,255,0.85);
+            font-size: 0.9rem;
+            margin-top: 6px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* === Controls Panel === */
+        .controls {
+            background: white;
+            border-radius: 0 0 24px 24px;
+            padding: 16px 20px 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .search-wrapper {
+            position: relative;
+            margin-bottom: 14px;
+        }
+        .search-wrapper svg {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            fill: #aaa;
+            pointer-events: none;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 42px;
+            font-size: 15px;
+            border: 2px solid #e8ecf4;
+            border-radius: 14px;
+            outline: none;
+            transition: border-color 0.25s, box-shadow 0.25s;
+            background: #f7f9fc;
+            -webkit-appearance: none;
+        }
+        .search-box input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.15);
+            background: white;
+        }
+        .search-box input::placeholder {
+            color: #b0b8c9;
+        }
+
+        .category-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        .category-btn {
+            padding: 8px 14px;
+            font-size: 13px;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-weight: 600;
+            white-space: nowrap;
+            touch-action: manipulation;
+            background: #f0f2f7;
+            color: #555;
+            position: relative;
+        }
+        .category-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+        .category-btn.active {
+            color: white;
+            transform: scale(1.04);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+        }
+        .category-btn .badge {
+            display: inline-block;
+            background: rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 1px 6px;
+            font-size: 11px;
+            margin-left: 4px;
+            font-weight: 700;
+        }
+        .category-btn.active .badge {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .btn-all.active { background: #667eea; }
+        .btn-fruits.active { background: #40c057; }
+        .btn-toys.active { background: #fab005; color: #333 !important; }
+        .btn-furniture.active { background: #fd7e14; }
+        .btn-appliances.active { background: #339af0; }
+        .btn-daily.active { background: #7950f2; }
+        .btn-clothes.active { background: #e64980; }
+        .btn-transport.active { background: #20c997; }
+        .btn-animals.active { background: #e8590c; }
+        .btn-body.active { background: #d6336c; }
+        .btn-food.active { background: #f76707; }
+
+        /* === Cards Grid === */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+            gap: 14px;
+            padding: 18px 0 20px;
+        }
+
+        /* === Card === */
+        .card {
+            background: white;
+            border-radius: 18px;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            cursor: pointer;
+            overflow: hidden;
+            animation: cardIn 0.4s ease forwards;
+            opacity: 0;
+            perspective: 600px;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+        .card:active {
+            transform: scale(0.97);
+        }
+
+        /* Category accent strip */
+        .card-accent {
+            height: 5px;
+            width: 100%;
+        }
+        .card[data-category="fruits"] .card-accent { background: #40c057; }
+        .card[data-category="toys"] .card-accent { background: #fab005; }
+        .card[data-category="furniture"] .card-accent { background: #fd7e14; }
+        .card[data-category="appliances"] .card-accent { background: #339af0; }
+        .card[data-category="daily"] .card-accent { background: #7950f2; }
+        .card[data-category="clothes"] .card-accent { background: #e64980; }
+        .card[data-category="transport"] .card-accent { background: #20c997; }
+        .card[data-category="animals"] .card-accent { background: #e8590c; }
+        .card[data-category="body"] .card-accent { background: #d6336c; }
+        .card[data-category="food"] .card-accent { background: #f76707; }
+
+        .card-inner {
+            padding: 16px 12px 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .card-img {
+            width: 72px;
+            height: 72px;
+            margin-bottom: 8px;
+            transition: transform 0.3s ease;
+            image-rendering: -webkit-optimize-contrast;
+        }
+        .card:hover .card-img {
+            transform: scale(1.12);
+        }
+
+        .card-chinese {
+            font-size: 1.05rem;
+            color: #333;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+        .card-english {
+            font-size: 1.1rem;
+            color: #667eea;
+            font-weight: 700;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+        .card-pronunciation {
+            font-size: 0.8rem;
+            color: #9aa3b4;
+            font-style: italic;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .speak-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+            box-shadow: 0 3px 10px rgba(102,126,234,0.3);
+        }
+        .speak-btn:hover {
+            transform: scale(1.12);
+            box-shadow: 0 5px 18px rgba(102,126,234,0.45);
+        }
+        .speak-btn:active {
+            transform: scale(0.92);
+        }
+
+        .speak-slow-btn {
+            background: linear-gradient(135deg, #20c997 0%, #12b886 100%);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+            box-shadow: 0 3px 10px rgba(32,201,151,0.3);
+        }
+        .speak-slow-btn:hover {
+            transform: scale(1.12);
+            box-shadow: 0 5px 18px rgba(32,201,151,0.45);
+        }
+        .speak-slow-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* === Stats Bar === */
+        .stats-bar {
+            text-align: center;
+            color: #7c8594;
+            font-size: 0.9rem;
+            padding: 12px;
+            margin-top: 4px;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #7c8594;
+            font-size: 1.1rem;
+            padding: 50px 20px;
+            background: white;
+            border-radius: 18px;
+            grid-column: 1 / -1;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+
+        /* === Back to Top === */
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: white;
+            color: #667eea;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: all 0.25s ease;
+        }
+        .back-to-top.visible { display: flex; }
+        .back-to-top:active { transform: scale(0.88); }
+
+        /* === Detail Modal === */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.open {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-container {
+            position: relative;
+            width: 92vw;
+            max-width: 420px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .modal-close {
+            position: absolute;
+            top: -44px;
+            right: 0;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            z-index: 10;
+        }
+        .modal-close:hover { background: rgba(255,255,255,0.35); }
+
+        .detail-card {
+            background: white;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        }
+        .detail-card.slide-out-left {
+            animation: slideOutLeft 0.3s ease-in forwards;
+        }
+        .detail-card.slide-in-right {
+            animation: slideInRight 0.3s ease-out forwards;
+        }
+        .detail-card.slide-out-right {
+            animation: slideOutRight 0.3s ease-in forwards;
+        }
+        .detail-card.slide-in-left {
+            animation: slideInLeft 0.3s ease-out forwards;
+        }
+        @keyframes slideOutLeft {
+            0%   { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(-60px); opacity: 0; }
+        }
+        @keyframes slideInRight {
+            0%   { transform: translateX(60px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutRight {
+            0%   { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(60px); opacity: 0; }
+        }
+        @keyframes slideInLeft {
+            0%   { transform: translateX(-60px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        .detail-accent {
+            height: 6px;
+            width: 100%;
+        }
+        .detail-body {
+            padding: 28px 24px 24px;
+            text-align: center;
+        }
+        .detail-emoji-img {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 16px;
+            image-rendering: -webkit-optimize-contrast;
+        }
+        .detail-chinese {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #222;
+            margin-bottom: 6px;
+        }
+        .detail-english {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 4px;
+        }
+        .detail-pronunciation {
+            font-size: 1rem;
+            color: #9aa3b4;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+        .detail-speak-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .detail-speak-btn {
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            touch-action: manipulation;
+        }
+        .detail-speak-btn:active { transform: scale(0.95); }
+        .detail-speak-en {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 14px rgba(102,126,234,0.35);
+        }
+        .detail-speak-en:hover { box-shadow: 0 6px 20px rgba(102,126,234,0.5); }
+        .detail-speak-cn {
+            background: linear-gradient(135deg, #f06595 0%, #e64980 100%);
+            box-shadow: 0 4px 14px rgba(230,73,128,0.35);
+        }
+        .detail-speak-cn:hover { box-shadow: 0 6px 20px rgba(230,73,128,0.5); }
+
+        .detail-counter {
+            font-size: 0.85rem;
+            color: #b0b8c9;
+            font-weight: 600;
+        }
+
+        /* Nav arrows */
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+            transition: all 0.2s ease;
+            z-index: 10;
+            color: #555;
+        }
+        .modal-nav:hover {
+            background: white;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+        }
+        .modal-nav:active { transform: translateY(-50%) scale(0.9); }
+        .modal-nav:disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+        .modal-nav:disabled:hover {
+            background: rgba(255,255,255,0.9);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+        }
+        .modal-prev { left: -56px; }
+        .modal-next { right: -56px; }
+        .modal-nav svg { width: 22px; height: 22px; fill: currentColor; }
+
+        @media (max-width: 540px) {
+            .modal-prev { left: 4px; }
+            .modal-next { right: 4px; }
+            .modal-nav {
+                width: 38px;
+                height: 38px;
+            }
+            .modal-nav svg { width: 18px; height: 18px; }
+            .detail-emoji-img { width: 96px; height: 96px; }
+            .detail-chinese { font-size: 1.5rem; }
+            .detail-english { font-size: 1.3rem; }
+            .detail-body { padding: 22px 18px 20px; }
+            .detail-speak-btn { padding: 10px 18px; font-size: 0.9rem; }
+        }
+
+        /* === Animations === */
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(16px) scale(0.96); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* === Responsive === */
+        @media (min-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .hero p { font-size: 1rem; }
+            .cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 16px;
+                padding: 22px 0;
+            }
+            .card-inner { padding: 20px 16px 18px; }
+            .card-img { width: 80px; height: 80px; }
+            .card-chinese { font-size: 1.2rem; }
+            .card-english { font-size: 1.25rem; }
+            .category-btn { padding: 10px 18px; font-size: 14px; }
+        }
+        @media (min-width: 1024px) {
+            .cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+        @media (max-width: 360px) {
+            .hero h1 { font-size: 1.3rem; }
+            .cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .card-inner { padding: 12px 8px 10px; }
+            .card-img { width: 56px; height: 56px; }
+            .card-chinese { font-size: 0.9rem; }
+            .card-english { font-size: 0.95rem; }
+            .category-btn { padding: 6px 10px; font-size: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <h1>儿童英语单词卡</h1>
+    <p>点击喇叭听发音，学习身边常见事物的英文说法</p>
+</div>
+
+<div class="container">
+    <div class="controls">
+        <div class="search-wrapper">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索中文或英文..." autocomplete="off">
+            </div>
+        </div>
+        <div class="category-buttons" id="categoryButtons"></div>
+    </div>
+
+    <div class="cards-grid" id="cardsGrid"></div>
+    <div class="stats-bar" id="stats"></div>
+</div>
+
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
+</button>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-container" id="modalContainer">
+        <button class="modal-close" id="modalClose" title="关闭">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+        <button class="modal-nav modal-prev" id="modalPrev" title="上一个">
+            <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        </button>
+        <button class="modal-nav modal-next" id="modalNext" title="下一个">
+            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+        </button>
+        <div class="detail-card" id="detailCard">
+            <div class="detail-accent" id="detailAccent"></div>
+            <div class="detail-body">
+                <img class="detail-emoji-img" id="detailImg" src="" alt="">
+                <div class="detail-chinese" id="detailChinese"></div>
+                <div class="detail-english" id="detailEnglish"></div>
+                <div class="detail-pronunciation" id="detailPron"></div>
+                <div class="detail-speak-row">
+                    <button class="detail-speak-btn detail-speak-cn" id="speakCn">
+                        <span>📢</span> 中文
+                    </button>
+                    <button class="detail-speak-btn detail-speak-en" id="speakEn">
+                        <span>🔊</span> English
+                    </button>
+                </div>
+                <div class="detail-counter" id="detailCounter"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// --- Twemoji: convert emoji to image URL ---
+const TWEMOJI_BASE = 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/';
+const VS15 = String.fromCodePoint(0xFE0E); // text presentation selector
+const VS16 = String.fromCodePoint(0xFE0F); // emoji presentation selector
+
+function emojiToUrl(emoji) {
+    const codePoints = [];
+    for (const char of emoji) {
+        const cp = char.codePointAt(0);
+        if (cp === 0xFE0F || cp === 0xFE0E) continue; // skip variation selectors
+        codePoints.push(cp.toString(16));
+    }
+    return TWEMOJI_BASE + codePoints.join('-') + '.png';
+}
+
+function cleanEmoji(emoji) {
+    return emoji.split('').filter(c => {
+        const cp = c.codePointAt(0);
+        return cp !== 0xFE0F && cp !== 0xFE0E;
+    }).join('');
+}
+
+// --- Category config ---
+const CATEGORIES = [
+    { key: 'all',        label: '全部',     emoji: '🌈' },
+    { key: 'fruits',     label: '水果蔬菜', emoji: '🍎' },
+    { key: 'toys',       label: '玩具',     emoji: '🧸' },
+    { key: 'furniture',  label: '家具',     emoji: '🪑' },
+    { key: 'appliances', label: '电器',     emoji: '📺' },
+    { key: 'daily',      label: '日用品',   emoji: '🧴' },
+    { key: 'clothes',    label: '衣物',     emoji: '👕' },
+    { key: 'transport',  label: '交通工具', emoji: '🚗' },
+    { key: 'body',       label: '身体部位', emoji: '👃' },
+    { key: 'food',       label: '食物饮料', emoji: '🍞' },
+    { key: 'animals',    label: '动物',     emoji: '🐱' },
+];
+
+// --- Word data ---
+const wordData = {
+    fruits: [
+        { chinese: "苹果", english: "apple", pronunciation: "ˈæpəl", emoji: "🍎" },
+        { chinese: "香蕉", english: "banana", pronunciation: "bəˈnænə", emoji: "🍌" },
+        { chinese: "橙子", english: "orange", pronunciation: "ˈɔrɪndʒ", emoji: "🍊" },
+        { chinese: "草莓", english: "strawberry", pronunciation: "ˈstrɔˌberi", emoji: "🍓" },
+        { chinese: "葡萄", english: "grape", pronunciation: "ɡreɪp", emoji: "🍇" },
+        { chinese: "西瓜", english: "watermelon", pronunciation: "ˈwɔtərˌmɛlən", emoji: "🍉" },
+        { chinese: "菠萝", english: "pineapple", pronunciation: "ˈpaɪnˌæpəl", emoji: "🍍" },
+        { chinese: "梨", english: "pear", pronunciation: "per", emoji: "🍐" },
+        { chinese: "桃子", english: "peach", pronunciation: "pitʃ", emoji: "🍑" },
+        { chinese: "樱桃", english: "cherry", pronunciation: "ˈtʃeri", emoji: "🍒" },
+        { chinese: "柠檬", english: "lemon", pronunciation: "ˈlɛmən", emoji: "🍋" },
+        { chinese: "胡萝卜", english: "carrot", pronunciation: "ˈkærət", emoji: "🥕" },
+        { chinese: "西兰花", english: "broccoli", pronunciation: "ˈbrɑkəli", emoji: "🥦" },
+        { chinese: "番茄", english: "tomato", pronunciation: "təˈmeɪtoʊ", emoji: "🍅" },
+        { chinese: "黄瓜", english: "cucumber", pronunciation: "ˈkjuˌkʌmbər", emoji: "🥒" },
+        { chinese: "土豆", english: "potato", pronunciation: "pəˈteɪtoʊ", emoji: "🥔" },
+        { chinese: "洋葱", english: "onion", pronunciation: "ˈʌnjən", emoji: "🧅" },
+        { chinese: "生菜", english: "lettuce", pronunciation: "ˈlɛtɪs", emoji: "🥬" },
+        { chinese: "玉米", english: "corn", pronunciation: "kɔrn", emoji: "🌽" },
+        { chinese: "芒果", english: "mango", pronunciation: "ˈmæŋɡoʊ", emoji: "🥭" },
+        { chinese: "猕猴桃", english: "kiwi", pronunciation: "ˈkiwi", emoji: "🥝" },
+        { chinese: "蓝莓", english: "blueberry", pronunciation: "ˈbluˌberi", emoji: "🫐" },
+        { chinese: "蘑菇", english: "mushroom", pronunciation: "ˈmʌʃrum", emoji: "🍄" },
+        { chinese: "南瓜", english: "pumpkin", pronunciation: "ˈpʌmpkɪn", emoji: "🎃" },
+        { chinese: "豌豆", english: "pea", pronunciation: "pi", emoji: "🫛" },
+        { chinese: "大蒜", english: "garlic", pronunciation: "ˈɡɑrlɪk", emoji: "🧄" },
+        { chinese: "辣椒", english: "chili", pronunciation: "ˈtʃɪli", emoji: "🌶️" },
+        { chinese: "茄子", english: "eggplant", pronunciation: "ˈɛɡˌplænt", emoji: "🍆" },
+        { chinese: "菠菜", english: "spinach", pronunciation: "ˈspɪnɪtʃ", emoji: "🥬" }
+    ],
+    toys: [
+        { chinese: "玩具熊", english: "teddy bear", pronunciation: "ˈtɛdi ber", emoji: "🧸" },
+        { chinese: "积木", english: "blocks", pronunciation: "blɑks", emoji: "🧱" },
+        { chinese: "拼图", english: "puzzle", pronunciation: "ˈpʌzəl", emoji: "🧩" },
+        { chinese: "洋娃娃", english: "doll", pronunciation: "dɑl", emoji: "🪆" },
+        { chinese: "玩具车", english: "toy car", pronunciation: "tɔɪ kɑr", emoji: "🚗" },
+        { chinese: "球", english: "ball", pronunciation: "bɔl", emoji: "⚽" },
+        { chinese: "跳绳", english: "jump rope", pronunciation: "dʒʌmp roʊp", emoji: "🪢" },
+        { chinese: "风筝", english: "kite", pronunciation: "kaɪt", emoji: "🪁" },
+        { chinese: "沙包", english: "beanbag", pronunciation: "ˈbinˌbæɡ", emoji: "🎯" },
+        { chinese: "玩偶", english: "puppet", pronunciation: "ˈpʌpɪt", emoji: "🎭" },
+        { chinese: "火车模型", english: "train set", pronunciation: "treɪn sɛt", emoji: "🚂" },
+        { chinese: "乐高", english: "LEGO", pronunciation: "ˈlɛɡoʊ", emoji: "🧱" },
+        { chinese: "橡皮泥", english: "play-doh", pronunciation: "pleɪ doʊ", emoji: "🎨" },
+        { chinese: "滑板车", english: "scooter", pronunciation: "ˈskutər", emoji: "🛴" },
+        { chinese: "蹦床", english: "trampoline", pronunciation: "ˈtræmpəlin", emoji: "🤸" },
+        { chinese: "气球", english: "balloon", pronunciation: "bəˈlun", emoji: "🎈" },
+        { chinese: "机器人", english: "robot", pronunciation: "ˈroʊbɑt", emoji: "🤖" },
+        { chinese: "魔方", english: "Rubik's cube", pronunciation: "ˈrubɪks kjub", emoji: "🎲" },
+        { chinese: "画笔", english: "paintbrush", pronunciation: "ˈpeɪntˌbrʌʃ", emoji: "🖌️" },
+        { chinese: "蜡笔", english: "crayon", pronunciation: "ˈkreɪˌɑn", emoji: "🖍️" },
+        { chinese: "足球", english: "soccer ball", pronunciation: "ˈsɑkər bɔl", emoji: "⚽" },
+        { chinese: "篮球", english: "basketball", pronunciation: "ˈbæskɪtˌbɔl", emoji: "🏀" },
+        { chinese: "羽毛球", english: "badminton", pronunciation: "ˈbædmɪntən", emoji: "🏸" },
+        { chinese: "扑克牌", english: "playing cards", pronunciation: "ˈpleɪɪŋ kɑrdz", emoji: "🃏" }
+    ],
+    furniture: [
+        { chinese: "桌子", english: "table", pronunciation: "ˈteɪbəl", emoji: "🪑" },
+        { chinese: "椅子", english: "chair", pronunciation: "tʃer", emoji: "🪑" },
+        { chinese: "沙发", english: "sofa", pronunciation: "ˈsoʊfə", emoji: "🛋️" },
+        { chinese: "床", english: "bed", pronunciation: "bɛd", emoji: "🛏️" },
+        { chinese: "衣柜", english: "wardrobe", pronunciation: "ˈwɔrˌdroʊb", emoji: "🚪" },
+        { chinese: "抽屉柜", english: "dresser", pronunciation: "ˈdrɛsər", emoji: "🗄️" },
+        { chinese: "书架", english: "bookshelf", pronunciation: "ˈbʊkˌʃɛlf", emoji: "📚" },
+        { chinese: "书桌", english: "desk", pronunciation: "dɛsk", emoji: "🪑" },
+        { chinese: "梳妆台", english: "vanity", pronunciation: "ˈvænəti", emoji: "💄" },
+        { chinese: "餐桌", english: "dining table", pronunciation: "ˈdaɪnɪŋ ˌteɪbəl", emoji: "🍽️" },
+        { chinese: "凳子", english: "stool", pronunciation: "stul", emoji: "🪑" },
+        { chinese: "婴儿床", english: "crib", pronunciation: "krɪb", emoji: "👶" },
+        { chinese: "吊灯", english: "chandelier", pronunciation: "ˌʃændəˈlɪr", emoji: "💡" },
+        { chinese: "地毯", english: "rug", pronunciation: "rʌɡ", emoji: "🟫" },
+        { chinese: "窗帘", english: "curtain", pronunciation: "ˈkɜrtən", emoji: "🪟" },
+        { chinese: "茶几", english: "coffee table", pronunciation: "ˈkɔfi ˌteɪbəl", emoji: "☕" },
+        { chinese: "鞋柜", english: "shoe cabinet", pronunciation: "ʃu ˈkæbɪnɪt", emoji: "👟" },
+        { chinese: "床头柜", english: "nightstand", pronunciation: "ˈnaɪtˌstænd", emoji: "🛋️" },
+        { chinese: "镜子", english: "mirror", pronunciation: "ˈmɪrər", emoji: "🪞" },
+        { chinese: "花瓶", english: "vase", pronunciation: "veɪs", emoji: "🏺" },
+        { chinese: "挂钟", english: "wall clock", pronunciation: "wɔl klɑk", emoji: "🕐" }
+    ],
+    appliances: [
+        { chinese: "电视", english: "television", pronunciation: "ˈtɛləˌvɪʒən", emoji: "📺" },
+        { chinese: "冰箱", english: "refrigerator", pronunciation: "rɪˈfrɪdʒəˌreɪtər", emoji: "🧊" },
+        { chinese: "微波炉", english: "microwave", pronunciation: "ˈmaɪkrəˌweɪv", emoji: "📡" },
+        { chinese: "烤箱", english: "oven", pronunciation: "ˈʌvən", emoji: "🔥" },
+        { chinese: "洗衣机", english: "washing machine", pronunciation: "ˈwɑʃɪŋ məˈʃin", emoji: "🫧" },
+        { chinese: "烘干机", english: "dryer", pronunciation: "ˈdraɪər", emoji: "💨" },
+        { chinese: "空调", english: "air conditioner", pronunciation: "er kənˈdɪʃənər", emoji: "❄️" },
+        { chinese: "风扇", english: "fan", pronunciation: "fæn", emoji: "🌀" },
+        { chinese: "吸尘器", english: "vacuum", pronunciation: "ˈvækjum", emoji: "🧹" },
+        { chinese: "电饭煲", english: "rice cooker", pronunciation: "raɪs ˈkʊkər", emoji: "🍚" },
+        { chinese: "电热水壶", english: "electric kettle", pronunciation: "ɪˈlɛktrɪk ˈkɛtəl", emoji: "☕" },
+        { chinese: "电脑", english: "computer", pronunciation: "kəmˈpjutər", emoji: "💻" },
+        { chinese: "手机", english: "cellphone", pronunciation: "ˈsɛlˌfoʊn", emoji: "📱" },
+        { chinese: "平板电脑", english: "tablet", pronunciation: "ˈtæblɪt", emoji: "📱" },
+        { chinese: "台灯", english: "desk lamp", pronunciation: "dɛsk læmp", emoji: "💡" },
+        { chinese: "灯泡", english: "light bulb", pronunciation: "laɪt bʌlb", emoji: "💡" },
+        { chinese: "插座", english: "power outlet", pronunciation: "ˈpaʊər ˈaʊtlɛt", emoji: "🔌" },
+        { chinese: "充电器", english: "charger", pronunciation: "ˈtʃɑrdʒər", emoji: "🔋" },
+        { chinese: "打印机", english: "printer", pronunciation: "ˈprɪntər", emoji: "🖨️" },
+        { chinese: "音响", english: "speaker", pronunciation: "ˈspikər", emoji: "🔊" },
+        { chinese: "吹风机", english: "hair dryer", pronunciation: "her ˈdraɪər", emoji: "💨" },
+        { chinese: "电熨斗", english: "iron", pronunciation: "ˈaɪərn", emoji: "👔" },
+        { chinese: "路由器", english: "router", pronunciation: "ˈraʊtər", emoji: "📡" },
+        { chinese: "耳机", english: "headphones", pronunciation: "ˈhɛdˌfoʊnz", emoji: "🎧" }
+    ],
+    daily: [
+        { chinese: "杯子", english: "cup", pronunciation: "kʌp", emoji: "☕" },
+        { chinese: "盘子", english: "plate", pronunciation: "pleɪt", emoji: "🍽️" },
+        { chinese: "碗", english: "bowl", pronunciation: "boʊl", emoji: "🥣" },
+        { chinese: "勺子", english: "spoon", pronunciation: "spun", emoji: "🥄" },
+        { chinese: "叉子", english: "fork", pronunciation: "fɔrk", emoji: "🍴" },
+        { chinese: "刀子", english: "knife", pronunciation: "naɪf", emoji: "🔪" },
+        { chinese: "筷子", english: "chopsticks", pronunciation: "ˈtʃɑpˌstɪks", emoji: "🥢" },
+        { chinese: "水壶", english: "kettle", pronunciation: "ˈkɛtəl", emoji: "🫖" },
+        { chinese: "锅", english: "pot", pronunciation: "pɑt", emoji: "🍲" },
+        { chinese: "平底锅", english: "pan", pronunciation: "pæn", emoji: "🍳" },
+        { chinese: "牙刷", english: "toothbrush", pronunciation: "ˈtuθˌbrʌʃ", emoji: "🪥" },
+        { chinese: "牙膏", english: "toothpaste", pronunciation: "ˈtuθˌpeɪst", emoji: "🧴" },
+        { chinese: "毛巾", english: "towel", pronunciation: "ˈtaʊəl", emoji: "🧴" },
+        { chinese: "香皂", english: "soap", pronunciation: "soʊp", emoji: "🧼" },
+        { chinese: "洗发水", english: "shampoo", pronunciation: "ʃæmˈpu", emoji: "🧴" },
+        { chinese: "垃圾桶", english: "trash can", pronunciation: "træʃ kæn", emoji: "🗑️" },
+        { chinese: "扫帚", english: "broom", pronunciation: "brum", emoji: "🧹" },
+        { chinese: "拖把", english: "mop", pronunciation: "mɑp", emoji: "🧹" },
+        { chinese: "镜子", english: "mirror", pronunciation: "ˈmɪrər", emoji: "🪞" },
+        { chinese: "闹钟", english: "alarm clock", pronunciation: "əˈlɑrm klɑk", emoji: "⏰" },
+        { chinese: "钥匙", english: "key", pronunciation: "ki", emoji: "🔑" },
+        { chinese: "雨伞", english: "umbrella", pronunciation: "ʌmˈbrɛlə", emoji: "☂️" },
+        { chinese: "背包", english: "backpack", pronunciation: "ˈbækˌpæk", emoji: "🎒" },
+        { chinese: "水瓶", english: "water bottle", pronunciation: "ˈwɔtər ˈbɑtəl", emoji: "🧴" },
+        { chinese: "保鲜膜", english: "plastic wrap", pronunciation: "ˈplæstɪk ræp", emoji: "🎁" },
+        { chinese: "纸巾", english: "tissue", pronunciation: "ˈtɪʃu", emoji: "🧻" },
+        { chinese: "垃圾袋", english: "garbage bag", pronunciation: "ˈɡɑrbɪdʒ bæɡ", emoji: "🛍️" },
+        { chinese: "衣架", english: "hanger", pronunciation: "ˈhæŋər", emoji: "👔" },
+        { chinese: "针线包", english: "sewing kit", pronunciation: "ˈsoʊɪŋ kɪt", emoji: "🧵" }
+    ],
+    clothes: [
+        { chinese: "T恤", english: "T-shirt", pronunciation: "ˈtiˌʃɜrt", emoji: "👕" },
+        { chinese: "衬衫", english: "shirt", pronunciation: "ʃɜrt", emoji: "👔" },
+        { chinese: "裤子", english: "pants", pronunciation: "pænts", emoji: "👖" },
+        { chinese: "短裤", english: "shorts", pronunciation: "ʃɔrts", emoji: "🩳" },
+        { chinese: "裙子", english: "skirt", pronunciation: "skɜrt", emoji: "👗" },
+        { chinese: "连衣裙", english: "dress", pronunciation: "drɛs", emoji: "👗" },
+        { chinese: "袜子", english: "socks", pronunciation: "sɑks", emoji: "🧦" },
+        { chinese: "鞋子", english: "shoes", pronunciation: "ʃuz", emoji: "👟" },
+        { chinese: "外套", english: "jacket", pronunciation: "ˈdʒækɪt", emoji: "🧥" },
+        { chinese: "毛衣", english: "sweater", pronunciation: "ˈswɛtər", emoji: "🧥" },
+        { chinese: "帽子", english: "hat", pronunciation: "hæt", emoji: "🎩" },
+        { chinese: "围巾", english: "scarf", pronunciation: "skɑrf", emoji: "🧣" },
+        { chinese: "手套", english: "gloves", pronunciation: "ɡlʌvz", emoji: "🧤" },
+        { chinese: "睡衣", english: "pajamas", pronunciation: "pəˈdʒæməz", emoji: "🩱" },
+        { chinese: "牛仔裤", english: "jeans", pronunciation: "dʒinz", emoji: "👖" },
+        { chinese: "运动鞋", english: "sneakers", pronunciation: "ˈsnikərz", emoji: "👟" },
+        { chinese: "靴子", english: "boots", pronunciation: "buts", emoji: "👢" },
+        { chinese: "泳衣", english: "swimsuit", pronunciation: "ˈswɪmˌsut", emoji: "🩱" },
+        { chinese: "内衣", english: "underwear", pronunciation: "ˈʌndərˌwer", emoji: "🩲" },
+        { chinese: "领带", english: "tie", pronunciation: "taɪ", emoji: "👔" },
+        { chinese: "腰带", english: "belt", pronunciation: "bɛlt", emoji: "➰" },
+        { chinese: "太阳镜", english: "sunglasses", pronunciation: "ˈsʌnˌɡlæsɪz", emoji: "🕶️" },
+        { chinese: "手帕", english: "handkerchief", pronunciation: "ˈhæŋkərtʃɪf", emoji: "🧣" }
+    ],
+    transport: [
+        { chinese: "汽车", english: "car", pronunciation: "kɑr", emoji: "🚗" },
+        { chinese: "公交车", english: "bus", pronunciation: "bʌs", emoji: "🚌" },
+        { chinese: "火车", english: "train", pronunciation: "treɪn", emoji: "🚆" },
+        { chinese: "飞机", english: "airplane", pronunciation: "ˈerˌpleɪn", emoji: "✈️" },
+        { chinese: "船", english: "boat", pronunciation: "boʊt", emoji: "🚤" },
+        { chinese: "自行车", english: "bicycle", pronunciation: "ˈbaɪsɪkəl", emoji: "🚲" },
+        { chinese: "摩托车", english: "motorcycle", pronunciation: "ˈmoʊtərˌsaɪkəl", emoji: "🏍️" },
+        { chinese: "卡车", english: "truck", pronunciation: "trʌk", emoji: "🚛" },
+        { chinese: "救护车", english: "ambulance", pronunciation: "ˈæmbjələns", emoji: "🚑" },
+        { chinese: "消防车", english: "fire truck", pronunciation: "ˈfaɪər trʌk", emoji: "🚒" },
+        { chinese: "出租车", english: "taxi", pronunciation: "ˈtæksi", emoji: "🚕" },
+        { chinese: "地铁", english: "subway", pronunciation: "ˈsʌbˌweɪ", emoji: "🚇" },
+        { chinese: "直升机", english: "helicopter", pronunciation: "ˈhɛlɪˌkɑptər", emoji: "🚁" },
+        { chinese: "电动车", english: "electric car", pronunciation: "ɪˈlɛktrɪk kɑr", emoji: "🔋" },
+        { chinese: "轮船", english: "ship", pronunciation: "ʃɪp", emoji: "🚢" },
+        { chinese: "三轮车", english: "tricycle", pronunciation: "ˈtraɪsɪkəl", emoji: "🛺" },
+        { chinese: "滑板", english: "skateboard", pronunciation: "ˈskeɪtˌbɔrd", emoji: "🛹" },
+        { chinese: "热气球", english: "hot air balloon", pronunciation: "hɑt er bəˈlun", emoji: "🎈" }
+    ],
+    body: [
+        { chinese: "头", english: "head", pronunciation: "hɛd", emoji: "🗣️" },
+        { chinese: "眼睛", english: "eye", pronunciation: "aɪ", emoji: "👁️" },
+        { chinese: "耳朵", english: "ear", pronunciation: "ɪr", emoji: "👂" },
+        { chinese: "鼻子", english: "nose", pronunciation: "noʊz", emoji: "👃" },
+        { chinese: "嘴巴", english: "mouth", pronunciation: "maʊθ", emoji: "👄" },
+        { chinese: "牙齿", english: "tooth", pronunciation: "tuθ", emoji: "🦷" },
+        { chinese: "舌头", english: "tongue", pronunciation: "tʌŋ", emoji: "👅" },
+        { chinese: "头发", english: "hair", pronunciation: "her", emoji: "💇" },
+        { chinese: "脸", english: "face", pronunciation: "feɪs", emoji: "😊" },
+        { chinese: "手", english: "hand", pronunciation: "hænd", emoji: "✋" },
+        { chinese: "手指", english: "finger", pronunciation: "ˈfɪŋɡər", emoji: "👆" },
+        { chinese: "脚", english: "foot", pronunciation: "fʊt", emoji: "🦶" },
+        { chinese: "手臂", english: "arm", pronunciation: "ɑrm", emoji: "💪" },
+        { chinese: "腿", english: "leg", pronunciation: "lɛɡ", emoji: "🦵" },
+        { chinese: "膝盖", english: "knee", pronunciation: "ni", emoji: "🦿" },
+        { chinese: "肚子", english: "belly", pronunciation: "ˈbɛli", emoji: "🤰" },
+        { chinese: "心脏", english: "heart", pronunciation: "hɑrt", emoji: "❤️" },
+        { chinese: "肩膀", english: "shoulder", pronunciation: "ˈʃoʊldər", emoji: "🤷" },
+        { chinese: "脖子", english: "neck", pronunciation: "nɛk", emoji: "🦒" },
+        { chinese: "后背", english: "back", pronunciation: "bæk", emoji: "🔙" }
+    ],
+    food: [
+        { chinese: "米饭", english: "rice", pronunciation: "raɪs", emoji: "🍚" },
+        { chinese: "面包", english: "bread", pronunciation: "brɛd", emoji: "🍞" },
+        { chinese: "牛奶", english: "milk", pronunciation: "mɪlk", emoji: "🥛" },
+        { chinese: "鸡蛋", english: "egg", pronunciation: "ɛɡ", emoji: "🥚" },
+        { chinese: "蛋糕", english: "cake", pronunciation: "keɪk", emoji: "🎂" },
+        { chinese: "饼干", english: "cookie", pronunciation: "ˈkʊki", emoji: "🍪" },
+        { chinese: "冰淇淋", english: "ice cream", pronunciation: "aɪs krim", emoji: "🍦" },
+        { chinese: "巧克力", english: "chocolate", pronunciation: "ˈtʃɑklɪt", emoji: "🍫" },
+        { chinese: "糖果", english: "candy", pronunciation: "ˈkændi", emoji: "🍬" },
+        { chinese: "果汁", english: "juice", pronunciation: "dʒus", emoji: "🧃" },
+        { chinese: "水", english: "water", pronunciation: "ˈwɔtər", emoji: "💧" },
+        { chinese: "茶", english: "tea", pronunciation: "ti", emoji: "🍵" },
+        { chinese: "咖啡", english: "coffee", pronunciation: "ˈkɔfi", emoji: "☕" },
+        { chinese: "酸奶", english: "yogurt", pronunciation: "ˈjoʊɡərt", emoji: "🥛" },
+        { chinese: "果酱", english: "jam", pronunciation: "dʒæm", emoji: "🍓" },
+        { chinese: "蜂蜜", english: "honey", pronunciation: "ˈhʌni", emoji: "🍯" },
+        { chinese: "花生", english: "peanut", pronunciation: "ˈpiˌnʌt", emoji: "🥜" },
+        { chinese: "三明治", english: "sandwich", pronunciation: "ˈsændwɪtʃ", emoji: "🥪" },
+        { chinese: "汉堡", english: "hamburger", pronunciation: "ˈhæmˌbɜrɡər", emoji: "🍔" },
+        { chinese: "披萨", english: "pizza", pronunciation: "ˈpitsə", emoji: "🍕" },
+        { chinese: "面条", english: "noodles", pronunciation: "ˈnudəlz", emoji: "🍜" },
+        { chinese: "饺子", english: "dumpling", pronunciation: "ˈdʌmplɪŋ", emoji: "🥟" },
+        { chinese: "沙拉", english: "salad", pronunciation: "ˈsæləd", emoji: "🥗" },
+        { chinese: "爆米花", english: "popcorn", pronunciation: "ˈpɑpˌkɔrn", emoji: "🍿" }
+    ],
+    animals: [
+        { chinese: "猫", english: "cat", pronunciation: "kæt", emoji: "🐱" },
+        { chinese: "狗", english: "dog", pronunciation: "dɔɡ", emoji: "🐶" },
+        { chinese: "鱼", english: "fish", pronunciation: "fɪʃ", emoji: "🐟" },
+        { chinese: "鸟", english: "bird", pronunciation: "bɜrd", emoji: "🐦" },
+        { chinese: "兔子", english: "rabbit", pronunciation: "ˈræbɪt", emoji: "🐰" },
+        { chinese: "乌龟", english: "turtle", pronunciation: "ˈtɜrtəl", emoji: "🐢" },
+        { chinese: "仓鼠", english: "hamster", pronunciation: "ˈhæmstər", emoji: "🐹" },
+        { chinese: "金鱼", english: "goldfish", pronunciation: "ˈɡoʊldˌfɪʃ", emoji: "🐟" },
+        { chinese: "鹦鹉", english: "parrot", pronunciation: "ˈpærət", emoji: "🦜" },
+        { chinese: "蝴蝶", english: "butterfly", pronunciation: "ˈbʌtərˌflaɪ", emoji: "🦋" },
+        { chinese: "蜜蜂", english: "bee", pronunciation: "bi", emoji: "🐝" },
+        { chinese: "蚂蚁", english: "ant", pronunciation: "ænt", emoji: "🐜" },
+        { chinese: "瓢虫", english: "ladybug", pronunciation: "ˈleɪdiˌbʌɡ", emoji: "🐞" },
+        { chinese: "蜗牛", english: "snail", pronunciation: "sneɪl", emoji: "🐌" },
+        { chinese: "蜘蛛", english: "spider", pronunciation: "ˈspaɪdər", emoji: "🕷️" },
+        { chinese: "鸭子", english: "duck", pronunciation: "dʌk", emoji: "🦆" },
+        { chinese: "鸡", english: "chicken", pronunciation: "ˈtʃɪkɪn", emoji: "🐔" },
+        { chinese: "猪", english: "pig", pronunciation: "pɪɡ", emoji: "🐷" },
+        { chinese: "牛", english: "cow", pronunciation: "kaʊ", emoji: "🐮" },
+        { chinese: "马", english: "horse", pronunciation: "hɔrs", emoji: "🐴" },
+        { chinese: "羊", english: "sheep", pronunciation: "ʃip", emoji: "🐑" },
+        { chinese: "猴子", english: "monkey", pronunciation: "ˈmʌŋki", emoji: "🐵" },
+        { chinese: "大象", english: "elephant", pronunciation: "ˈɛlɪfənt", emoji: "🐘" },
+        { chinese: "狮子", english: "lion", pronunciation: "ˈlaɪən", emoji: "🦁" },
+        { chinese: "老虎", english: "tiger", pronunciation: "ˈtaɪɡər", emoji: "🐯" },
+        { chinese: "熊猫", english: "panda", pronunciation: "ˈpændə", emoji: "🐼" },
+        { chinese: "企鹅", english: "penguin", pronunciation: "ˈpɛŋɡwɪn", emoji: "🐧" }
+    ]
+};
+
+// --- State ---
+let currentCategory = 'all';
+let allWords = [];
+let isSpeaking = false;
+
+// --- Modal state ---
+let modalWords = [];
+let modalIndex = 0;
+let isFlipping = false;
+
+// --- Flatten word data ---
+function initWords() {
+    allWords = [];
+    for (const [category, words] of Object.entries(wordData)) {
+        words.forEach(word => allWords.push({ ...word, category }));
+    }
+}
+
+// --- Build category buttons ---
+function renderCategoryButtons() {
+    const container = document.getElementById('categoryButtons');
+    const countMap = { all: allWords.length };
+    for (const [cat, words] of Object.entries(wordData)) {
+        countMap[cat] = words.length;
+    }
+    container.innerHTML = CATEGORIES.map(c =>
+        `<button class="category-btn btn-${c.key}${c.key === currentCategory ? ' active' : ''}" data-category="${c.key}">
+            ${c.emoji} ${c.label}<span class="badge">${countMap[c.key]}</span>
+        </button>`
+    ).join('');
+}
+
+// --- Create a card element ---
+function createCard(word) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.category = word.category;
+    card.innerHTML = `
+        <div class="card-accent"></div>
+        <div class="card-inner">
+            <img class="card-img" src="${emojiToUrl(word.emoji)}" alt="${word.english}" loading="lazy"
+                 onerror="this.outerHTML='<span style=\\'font-size:3rem\\'>${cleanEmoji(word.emoji)}</span>'">
+            <div class="card-chinese">${word.chinese}</div>
+            <div class="card-english">${word.english}</div>
+            <div class="card-pronunciation">${word.pronunciation}</div>
+            <div class="card-actions">
+                <button class="speak-btn" data-word="${word.english}" data-rate="0.8" title="朗读">🔊</button>
+                <button class="speak-slow-btn" data-word="${word.english}" data-rate="0.5" title="慢速朗读">慢</button>
+            </div>
+        </div>
+    `;
+    return card;
+}
+
+// --- Render cards ---
+function renderCards() {
+    const grid = document.getElementById('cardsGrid');
+    const stats = document.getElementById('stats');
+    grid.innerHTML = '';
+
+    const words = getFilteredWords();
+
+    if (words.length === 0) {
+        grid.innerHTML = '<div class="no-results">没有找到匹配的单词</div>';
+    } else {
+        const fragment = document.createDocumentFragment();
+        words.forEach((word, i) => {
+            const card = createCard(word);
+            card.style.animationDelay = `${Math.min(i * 0.025, 0.8)}s`;
+            fragment.appendChild(card);
+        });
+        grid.appendChild(fragment);
+    }
+    stats.textContent = `共 ${words.length} 个单词`;
+}
+
+function getFilteredWords() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    return allWords.filter(w => {
+        const catMatch = currentCategory === 'all' || w.category === currentCategory;
+        const qMatch = !q || w.chinese.includes(q) || w.english.toLowerCase().includes(q) || w.pronunciation.toLowerCase().includes(q);
+        return catMatch && qMatch;
+    });
+}
+
+// --- Speech ---
+function speakWord(word, rate) {
+    if (isSpeaking) {
+        window.speechSynthesis.cancel();
+        isSpeaking = false;
+        return;
+    }
+    if (!('speechSynthesis' in window)) {
+        alert('您的浏览器不支持语音合成');
+        return;
+    }
+    const u = new SpeechSynthesisUtterance(word);
+    u.lang = 'en-US';
+    u.rate = parseFloat(rate) || 0.8;
+    u.pitch = 1.1;
+    u.onstart = () => isSpeaking = true;
+    u.onend = () => isSpeaking = false;
+    u.onerror = () => isSpeaking = false;
+    window.speechSynthesis.speak(u);
+}
+
+// --- Category color map ---
+const CATEGORY_COLORS = {
+    fruits: '#40c057', toys: '#fab005', furniture: '#fd7e14', appliances: '#339af0',
+    daily: '#7950f2', clothes: '#e64980', transport: '#20c997', animals: '#e8590c',
+    body: '#d6336c', food: '#f76707'
+};
+
+// --- Modal ---
+function openModal(word, filteredWords) {
+    modalWords = filteredWords;
+    modalIndex = modalWords.indexOf(word);
+    if (modalIndex < 0) modalIndex = 0;
+    renderDetail(modalIndex, 'none');
+
+    const overlay = document.getElementById('modalOverlay');
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => overlay.classList.add('open'));
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    const overlay = document.getElementById('modalOverlay');
+    overlay.classList.remove('open');
+    setTimeout(() => { overlay.style.display = 'none'; }, 300);
+    document.body.style.overflow = '';
+    window.speechSynthesis.cancel();
+    isSpeaking = false;
+}
+
+function renderDetail(idx, direction) {
+    const word = modalWords[idx];
+    if (!word) return;
+
+    const card = document.getElementById('detailCard');
+    const accent = document.getElementById('detailAccent');
+    const img = document.getElementById('detailImg');
+    const cn = document.getElementById('detailChinese');
+    const en = document.getElementById('detailEnglish');
+    const pron = document.getElementById('detailPron');
+    const counter = document.getElementById('detailCounter');
+    const prevBtn = document.getElementById('modalPrev');
+    const nextBtn = document.getElementById('modalNext');
+
+    accent.style.background = CATEGORY_COLORS[word.category] || '#667eea';
+    img.src = emojiToUrl(word.emoji);
+    img.alt = word.english;
+    img.onerror = function() {
+        this.outerHTML = '<span style="font-size:4rem;display:block;line-height:1">' + cleanEmoji(word.emoji) + '</span>';
+    };
+    cn.textContent = word.chinese;
+    en.textContent = word.english;
+    pron.textContent = word.pronunciation;
+    counter.textContent = `${idx + 1} / ${modalWords.length}`;
+
+    prevBtn.disabled = idx === 0;
+    nextBtn.disabled = idx === modalWords.length - 1;
+
+    // Update speak button handlers
+    document.getElementById('speakCn').onclick = () => speakLang(word.chinese, 'zh-CN');
+    document.getElementById('speakEn').onclick = () => speakLang(word.english, 'en-US');
+}
+
+function navigateModal(direction) {
+    if (isFlipping) return;
+    const newIdx = modalIndex + direction;
+    if (newIdx < 0 || newIdx >= modalWords.length) return;
+
+    isFlipping = true;
+    const card = document.getElementById('detailCard');
+    const outClass = direction > 0 ? 'slide-out-left' : 'slide-out-right';
+    const inClass = direction > 0 ? 'slide-in-right' : 'slide-in-left';
+
+    card.classList.add(outClass);
+    card.addEventListener('animationend', function handler() {
+        card.removeEventListener('animationend', handler);
+        card.classList.remove(outClass);
+
+        modalIndex = newIdx;
+        renderDetail(modalIndex, direction > 0 ? 'right' : 'left');
+
+        card.classList.add(inClass);
+        card.addEventListener('animationend', function handler2() {
+            card.removeEventListener('animationend', handler2);
+            card.classList.remove(inClass);
+            isFlipping = false;
+        });
+    });
+}
+
+function speakLang(text, lang) {
+    if (isSpeaking) {
+        window.speechSynthesis.cancel();
+        isSpeaking = false;
+        return;
+    }
+    if (!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang;
+    u.rate = lang === 'zh-CN' ? 0.9 : 0.8;
+    u.pitch = 1.1;
+    u.onstart = () => isSpeaking = true;
+    u.onend = () => isSpeaking = false;
+    u.onerror = () => isSpeaking = false;
+    window.speechSynthesis.speak(u);
+}
+
+// --- Events ---
+function setupEvents() {
+    const grid = document.getElementById('cardsGrid');
+
+    // Card click -> open modal (but not when clicking speak buttons)
+    grid.addEventListener('click', e => {
+        const btn = e.target.closest('.speak-btn, .speak-slow-btn');
+        if (btn) {
+            e.preventDefault();
+            e.stopPropagation();
+            speakWord(btn.dataset.word, btn.dataset.rate);
+            return;
+        }
+        const cardEl = e.target.closest('.card');
+        if (cardEl) {
+            const idx = Array.from(grid.children).indexOf(cardEl);
+            const filteredWords = getFilteredWords();
+            if (filteredWords[idx]) openModal(filteredWords[idx], filteredWords);
+        }
+    });
+
+    document.getElementById('categoryButtons').addEventListener('click', e => {
+        const btn = e.target.closest('.category-btn');
+        if (!btn) return;
+        document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentCategory = btn.dataset.category;
+        renderCards();
+    });
+
+    let debounce;
+    document.getElementById('searchInput').addEventListener('input', () => {
+        clearTimeout(debounce);
+        debounce = setTimeout(renderCards, 180);
+    });
+
+    const backBtn = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+        backBtn.classList.toggle('visible', window.scrollY > 500);
+    }, { passive: true });
+
+    // --- Modal events ---
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modalPrev').addEventListener('click', () => navigateModal(-1));
+    document.getElementById('modalNext').addEventListener('click', () => navigateModal(1));
+
+    // Close on overlay click (but not on card/container)
+    document.getElementById('modalOverlay').addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeModal();
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', e => {
+        const overlay = document.getElementById('modalOverlay');
+        if (!overlay.classList.contains('open')) return;
+        if (e.key === 'Escape') closeModal();
+        if (e.key === 'ArrowLeft') navigateModal(-1);
+        if (e.key === 'ArrowRight') navigateModal(1);
+    });
+
+    // Touch swipe on modal
+    let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
+    const container = document.getElementById('modalContainer');
+    container.addEventListener('touchstart', e => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchStartTime = Date.now();
+    }, { passive: true });
+    container.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        const dt = Date.now() - touchStartTime;
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5 && dt < 500) {
+            navigateModal(dx < 0 ? 1 : -1);
+        }
+    }, { passive: true });
+}
+
+// --- Init ---
+document.addEventListener('DOMContentLoaded', () => {
+    initWords();
+    renderCategoryButtons();
+    setupEvents();
+    renderCards();
+});
+</script>
+</body>
+</html>
