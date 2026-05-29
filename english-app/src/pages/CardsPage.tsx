@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { wordCategories, wordData } from '../data/words'
 import type { Word } from '../data/types'
 import { useProgressStore } from '../store/progressStore'
@@ -13,15 +13,20 @@ const CATEGORY_COLORS: Record<string, string> = {
   transport: 'bg-teal-500', animals: 'bg-orange-600', body: 'bg-rose-500', food: 'bg-orange-400',
 }
 
+type WordWithCat = Word & { category: string }
+
 export function CardsPage() {
   const [cat, setCat] = useState('all')
   const [query, setQuery] = useState('')
-  const [detail, setDetail] = useState<Word | null>(null)
+  const [detailIdx, setDetailIdx] = useState<number | null>(null)
+  const [slideDir, setSlideDir] = useState<'none' | 'left' | 'right'>('none')
   const { speakCn, speakEn } = useSpeech()
   const getLevel = useProgressStore(s => s.getLevel)
+  const cardRef = useRef<HTMLDivElement>(null)
+  const touchStartRef = useRef({ x: 0, y: 0, time: 0 })
 
   const allWords = useMemo(() => {
-    const arr: (Word & { category: string })[] = []
+    const arr: WordWithCat[] = []
     for (const [category, words] of Object.entries(wordData)) {
       words.forEach(w => arr.push({ ...w, category }))
     }
@@ -42,6 +47,47 @@ export function CardsPage() {
     for (const [k, v] of Object.entries(wordData)) m[k] = v.length
     return m
   }, [allWords])
+
+  const detail = detailIdx !== null ? filtered[detailIdx] : null
+
+  const navigate = useCallback((dir: -1 | 1) => {
+    if (detailIdx === null) return
+    const newIdx = detailIdx + dir
+    if (newIdx < 0 || newIdx >= filtered.length) return
+    setSlideDir(dir > 0 ? 'left' : 'right')
+    setTimeout(() => {
+      setDetailIdx(newIdx)
+      setSlideDir(dir > 0 ? 'right' : 'left')
+      setTimeout(() => setSlideDir('none'), 300)
+    }, 250)
+  }, [detailIdx, filtered.length])
+
+  // Keyboard nav
+  useEffect(() => {
+    if (detailIdx === null) return
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setDetailIdx(null)
+      if (e.key === 'ArrowLeft') navigate(-1)
+      if (e.key === 'ArrowRight') navigate(1)
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [detailIdx, navigate])
+
+  // Touch swipe on modal
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, time: Date.now() }
+  }
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - touchStartRef.current.x
+    const dy = e.changedTouches[0].clientY - touchStartRef.current.y
+    const dt = Date.now() - touchStartRef.current.time
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5 && dt < 500) {
+      navigate(dx < 0 ? 1 : -1)
+    }
+  }
+
+  const slideClass = slideDir === 'left' ? 'animate-slide-out-left' : slideDir === 'right' ? 'animate-slide-in-right' : ''
 
   return (
     <>
@@ -93,9 +139,9 @@ export function CardsPage() {
             key={`${w.category}-${w.english}`}
             className="bg-white rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 active:scale-[0.97] transition-all cursor-pointer overflow-hidden animate-card-in"
             style={{ animationDelay: `${Math.min(i * 0.02, 0.6)}s` }}
-            onClick={() => setDetail(w)}
+            onClick={() => { setDetailIdx(i); setSlideDir('none') }}
           >
-            <div className={`h-1.5 ${CATEGORY_COLORS[w.category] || 'bg-indigo-500'}`} />
+            <div className={`h-1.5 ${CATEGORY_COLORS[w.category ?? ''] || 'bg-indigo-500'}`} />
             <div className="p-3.5 flex flex-col items-center gap-1">
               <EmojiImg emoji={w.emoji} size={60} />
               <div className="text-base font-bold text-gray-800 flex items-center gap-1">
@@ -121,10 +167,34 @@ export function CardsPage() {
 
       <div className="text-center text-gray-400 text-sm pb-4">共 {filtered.length} 个单词</div>
 
-      {/* Detail Modal */}
+      {/* Detail Modal with navigation */}
       {detail && (
-        <div className="fixed inset-0 z-[5000] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setDetail(null)}>
-          <div className="bg-white rounded-3xl shadow-2xl w-[90vw] max-w-[400px] overflow-hidden animate-modal-in" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[5000] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setDetailIdx(null)}>
+          {/* Prev arrow */}
+          {detailIdx! > 0 && (
+            <button
+              onClick={e => { e.stopPropagation(); navigate(-1) }}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/90 shadow-lg flex items-center justify-center text-gray-500 hover:bg-white active:scale-90 transition-transform z-10"
+            >
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+          )}
+          {/* Next arrow */}
+          {detailIdx! < filtered.length - 1 && (
+            <button
+              onClick={e => { e.stopPropagation(); navigate(1) }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/90 shadow-lg flex items-center justify-center text-gray-500 hover:bg-white active:scale-90 transition-transform z-10"
+            >
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+            </button>
+          )}
+          <div
+            ref={cardRef}
+            className={`bg-white rounded-3xl shadow-2xl w-[90vw] max-w-[400px] overflow-hidden ${slideDir === 'none' ? 'animate-modal-in' : slideClass}`}
+            onClick={e => e.stopPropagation()}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+          >
             <div className={`h-1.5 ${CATEGORY_COLORS[detail.category ?? ''] || 'bg-indigo-500'}`} />
             <div className="p-6 text-center">
               <EmojiImg emoji={detail.emoji} size={100} />
@@ -136,6 +206,7 @@ export function CardsPage() {
                 <SpeakButton text={detail.english} lang="en-US" label="🔊 English" variant="primary" size="lg" />
               </div>
               <div className="mt-3"><StarRating level={getLevel(detail.english, 'word')} size="md" /></div>
+              <div className="text-xs text-gray-300 mt-2">{detailIdx! + 1} / {filtered.length}</div>
             </div>
           </div>
         </div>

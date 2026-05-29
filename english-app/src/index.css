@@ -19,6 +19,40 @@
   animation: modal-in 0.3s ease forwards;
 }
 
+/* Modal slide transitions */
+@keyframes slide-out-left {
+  0%   { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(-60px); opacity: 0; }
+}
+@keyframes slide-in-right {
+  0%   { transform: translateX(60px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+@keyframes slide-out-right {
+  0%   { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(60px); opacity: 0; }
+}
+@keyframes slide-in-left {
+  0%   { transform: translateX(-60px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+.animate-slide-out-left  { animation: slide-out-left 0.25s ease-in forwards; }
+.animate-slide-in-right  { animation: slide-in-right 0.25s ease-out forwards; }
+.animate-slide-out-right { animation: slide-out-right 0.25s ease-in forwards; }
+.animate-slide-in-left   { animation: slide-in-left 0.25s ease-out forwards; }
+
+/* Wrong answer shake */
+@keyframes wrong-shake {
+  0%   { transform: scale(0) rotate(-5deg); opacity: 0; }
+  40%  { transform: scale(1.1) rotate(3deg); opacity: 1; }
+  60%  { transform: scale(0.95) rotate(-2deg); }
+  80%  { transform: scale(1.03) rotate(1deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.animate-wrong-shake {
+  animation: wrong-shake 0.6s ease forwards;
+}
+
 /* Celebration particles falling */
 @keyframes celebration-fall {
   0%   { transform: translateY(0) rotate(0deg); opacity: 1; }

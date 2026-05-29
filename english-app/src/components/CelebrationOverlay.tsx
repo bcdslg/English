@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 interface Props {
   show: boolean
-  type?: 'stars' | 'confetti'
+  type?: 'stars' | 'confetti' | 'wrong'
   message?: string
   onDone?: () => void
 }
@@ -17,6 +17,11 @@ export function CelebrationOverlay({ show, type = 'stars', message, onDone }: Pr
     if (!show) {
       setParticles([])
       return
+    }
+    if (type === 'wrong') {
+      setParticles([])
+      const timer = setTimeout(() => onDone?.(), 1500)
+      return () => clearTimeout(timer)
     }
     const pool = type === 'stars' ? EMOJIS_STARS : EMOJIS_CONFETTI
     const count = type === 'stars' ? 20 : 30
@@ -34,6 +39,17 @@ export function CelebrationOverlay({ show, type = 'stars', message, onDone }: Pr
   }, [show, type, onDone])
 
   if (!show) return null
+
+  // 答错提示：温和的"再试试"动画
+  if (type === 'wrong') {
+    return (
+      <div className="fixed inset-0 z-[3000] pointer-events-none flex items-center justify-center">
+        <div className="animate-wrong-shake text-3xl font-extrabold text-white bg-gradient-to-r from-orange-400 to-amber-400 px-8 py-4 rounded-3xl shadow-2xl">
+          {message || '再试试吧~ 💪'}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="fixed inset-0 z-[3000] pointer-events-none overflow-hidden">
@@ -53,7 +69,7 @@ export function CelebrationOverlay({ show, type = 'stars', message, onDone }: Pr
       ))}
       {message && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="animate-celebration-pop text-3xl font-extrabold text-white bg-gradient-to-r from-indigo-500 to-purple-500 px-8 py-4 rounded-3xl shadow-2xl">
+          <div className="animate-celebration-pop text-3xl font-extrabold text-white bg-gradient-to-r from-green-500 to-emerald-500 px-8 py-4 rounded-3xl shadow-2xl">
             {message}
           </div>
         </div>

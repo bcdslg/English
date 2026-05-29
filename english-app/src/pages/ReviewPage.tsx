@@ -5,7 +5,7 @@ import { useProgressStore } from '../store/progressStore'
 import { useSpeech } from '../hooks/useSpeech'
 import { EmojiImg } from '../components/EmojiImg'
 import { CelebrationOverlay } from '../components/CelebrationOverlay'
-import { playCorrectSound, playCelebrationSound } from '../utils/sound'
+import { playCheerSound, playAwwSound, playCelebrationSound } from '../utils/sound'
 
 interface ReviewItem {
   english: string
@@ -41,6 +41,7 @@ export function ReviewPage() {
   const [ci, setCi] = useState(0)
   const [done, setDone] = useState(false)
   const [celebrate, setCelebrate] = useState(false)
+  const [wrong, setWrong] = useState(false)
   const [todayCount, setTodayCount] = useState(0)
 
   const TOTAL = 10
@@ -77,7 +78,7 @@ export function ReviewPage() {
 
   const handleKnow = useCallback(() => {
     if (!current) return
-    playCorrectSound()
+    playCheerSound()
     recordAnswer(current.english, true, current.type)
     markReviewed(current.english)
     setTodayCount(c => c + 1)
@@ -92,15 +93,20 @@ export function ReviewPage() {
 
   const handleDontKnow = useCallback(() => {
     if (!current) return
+    playAwwSound()
+    setWrong(true)
     recordAnswer(current.english, false, current.type)
     markReviewed(current.english)
-    if (ci + 1 >= items.length) {
-      setDone(true)
-      setCelebrate(true)
-      playCelebrationSound()
-    } else {
-      setCi(ci + 1)
-    }
+    setTimeout(() => {
+      setWrong(false)
+      if (ci + 1 >= items.length) {
+        setDone(true)
+        setCelebrate(true)
+        playCelebrationSound()
+      } else {
+        setCi(ci + 1)
+      }
+    }, 1200)
   }, [current, ci, items, recordAnswer, markReviewed])
 
   if (items.length === 0) return null
@@ -140,6 +146,7 @@ export function ReviewPage() {
       </div>
 
       <div className="px-5 pt-5">
+        <CelebrationOverlay show={wrong} type="wrong" onDone={() => setWrong(false)} />
         <div className="text-center text-sm text-gray-400 mb-4 font-semibold">
           {ci + 1} / {items.length}
         </div>

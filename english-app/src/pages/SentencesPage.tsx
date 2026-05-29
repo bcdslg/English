@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { sentenceCategories, sentenceData } from '../data/sentences'
 import type { Sentence } from '../data/types'
 import { useProgressStore } from '../store/progressStore'
@@ -15,9 +15,11 @@ const CAT_COLORS: Record<string, string> = {
 export function SentencesPage() {
   const [cat, setCat] = useState('all')
   const [query, setQuery] = useState('')
-  const [detail, setDetail] = useState<Sentence | null>(null)
+  const [detailIdx, setDetailIdx] = useState<number | null>(null)
+  const [slideDir, setSlideDir] = useState<'none' | 'left' | 'right'>('none')
   const { speakCn, speakEn } = useSpeech()
   const getLevel = useProgressStore(s => s.getLevel)
+  const touchStartRef = useRef({ x: 0, y: 0, time: 0 })
 
   const allSentences = useMemo(() => {
     const arr: Sentence[] = []
@@ -41,6 +43,45 @@ export function SentencesPage() {
     for (const [k, v] of Object.entries(sentenceData)) m[k] = v.length
     return m
   }, [allSentences])
+
+  const detail = detailIdx !== null ? filtered[detailIdx] : null
+
+  const navigate = useCallback((dir: -1 | 1) => {
+    if (detailIdx === null) return
+    const newIdx = detailIdx + dir
+    if (newIdx < 0 || newIdx >= filtered.length) return
+    setSlideDir(dir > 0 ? 'left' : 'right')
+    setTimeout(() => {
+      setDetailIdx(newIdx)
+      setSlideDir(dir > 0 ? 'right' : 'left')
+      setTimeout(() => setSlideDir('none'), 300)
+    }, 250)
+  }, [detailIdx, filtered.length])
+
+  useEffect(() => {
+    if (detailIdx === null) return
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setDetailIdx(null)
+      if (e.key === 'ArrowLeft') navigate(-1)
+      if (e.key === 'ArrowRight') navigate(1)
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [detailIdx, navigate])
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, time: Date.now() }
+  }
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - touchStartRef.current.x
+    const dy = e.changedTouches[0].clientY - touchStartRef.current.y
+    const dt = Date.now() - touchStartRef.current.time
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5 && dt < 500) {
+      navigate(dx < 0 ? 1 : -1)
+    }
+  }
+
+  const slideClass = slideDir === 'left' ? 'animate-slide-out-left' : slideDir === 'right' ? 'animate-slide-in-right' : ''
 
   return (
     <>
@@ -89,7 +130,7 @@ export function SentencesPage() {
             key={s.english}
             className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden animate-card-in"
             style={{ animationDelay: `${Math.min(i * 0.03, 0.6)}s` }}
-            onClick={() => setDetail(s)}
+            onClick={() => { setDetailIdx(i); setSlideDir('none') }}
           >
             <div className={`h-1 ${CAT_COLORS[s.category] || 'bg-pink-500'}`} />
             <div className="p-4 flex items-center gap-3">
@@ -111,10 +152,31 @@ export function SentencesPage() {
         ))}
       </div>
 
-      {/* Detail Modal */}
+      {/* Detail Modal with navigation */}
       {detail && (
-        <div className="fixed inset-0 z-[5000] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setDetail(null)}>
-          <div className="bg-white rounded-3xl shadow-2xl w-[92vw] max-w-[440px] overflow-hidden animate-modal-in" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[5000] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setDetailIdx(null)}>
+          {detailIdx! > 0 && (
+            <button
+              onClick={e => { e.stopPropagation(); navigate(-1) }}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/90 shadow-lg flex items-center justify-center text-gray-500 hover:bg-white active:scale-90 transition-transform z-10"
+            >
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+          )}
+          {detailIdx! < filtered.length - 1 && (
+            <button
+              onClick={e => { e.stopPropagation(); navigate(1) }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/90 shadow-lg flex items-center justify-center text-gray-500 hover:bg-white active:scale-90 transition-transform z-10"
+            >
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+            </button>
+          )}
+          <div
+            className={`bg-white rounded-3xl shadow-2xl w-[92vw] max-w-[440px] overflow-hidden ${slideDir === 'none' ? 'animate-modal-in' : slideClass}`}
+            onClick={e => e.stopPropagation()}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+          >
             <div className={`h-1.5 ${CAT_COLORS[detail.category] || 'bg-pink-500'}`} />
             <div className="p-6 text-center">
               {detail.emoji && <EmojiImg emoji={detail.emoji} size={80} />}
@@ -125,6 +187,7 @@ export function SentencesPage() {
                 <SpeakButton text={detail.chinese} lang="zh-CN" label="📢 中文" variant="secondary" size="lg" />
                 <SpeakButton text={detail.english} lang="en-US" label="🔊 English" variant="primary" size="lg" rate={0.65} />
               </div>
+              <div className="text-xs text-gray-300 mt-3">{detailIdx! + 1} / {filtered.length}</div>
             </div>
           </div>
         </div>

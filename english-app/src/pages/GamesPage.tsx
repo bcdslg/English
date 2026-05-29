@@ -5,7 +5,7 @@ import { useProgressStore } from '../store/progressStore'
 import { useSpeech } from '../hooks/useSpeech'
 import { EmojiImg } from '../components/EmojiImg'
 import { CelebrationOverlay } from '../components/CelebrationOverlay'
-import { playCorrectSound, playWrongSound, playCelebrationSound } from '../utils/sound'
+import { playCheerSound, playAwwSound, playCelebrationSound } from '../utils/sound'
 
 type GameMode = 'menu' | 'listen' | 'match' | 'spell'
 type ContentType = 'words' | 'sentences'
@@ -55,6 +55,7 @@ function ListenGame({ contentType, onBack }: { contentType: ContentType; onBack:
   const [score, setScore] = useState(0)
   const [done, setDone] = useState(false)
   const [celebrate, setCelebrate] = useState(false)
+  const [wrong, setWrong] = useState(false)
   const { speakEn } = useSpeech()
   const recordAnswer = useProgressStore(s => s.recordAnswer)
 
@@ -80,14 +81,16 @@ function ListenGame({ contentType, onBack }: { contentType: ContentType; onBack:
     setSelected(idx)
     const isCorrect = options[idx].english === questions[qi].english
     if (isCorrect) {
-      playCorrectSound()
+      playCheerSound()
       setScore(s => s + 1)
       recordAnswer(questions[qi].english, true, contentType === 'words' ? 'word' : 'sentence')
     } else {
-      playWrongSound()
+      playAwwSound()
+      setWrong(true)
       recordAnswer(questions[qi].english, false, contentType === 'words' ? 'word' : 'sentence')
     }
     setTimeout(() => {
+      setWrong(false)
       if (qi + 1 >= questions.length) {
         setDone(true)
         setCelebrate(true)
@@ -121,6 +124,7 @@ function ListenGame({ contentType, onBack }: { contentType: ContentType; onBack:
   return (
     <div className="px-4 pt-4">
       <CelebrationOverlay show={celebrate} type="stars" onDone={() => setCelebrate(false)} />
+      <CelebrationOverlay show={wrong} type="wrong" onDone={() => setWrong(false)} />
       <div className="flex justify-between items-center mb-4">
         <button onClick={onBack} className="text-indigo-500 font-bold text-sm">← 返回</button>
         <span className="text-sm text-gray-400 font-semibold">{qi + 1} / {TOTAL}</span>
@@ -201,7 +205,7 @@ function MatchGame({ contentType, onBack }: { contentType: ContentType; onBack: 
       const c2 = cards.find(c => c.id === newFlipped[1])!
       if (c1.pairIdx === c2.pairIdx && c1.side !== c2.side) {
         // Match!
-        playCorrectSound()
+        playCheerSound()
         const item = pairs[c1.pairIdx]
         recordAnswer(item.english, true, contentType === 'words' ? 'word' : 'sentence')
         setTimeout(() => {
@@ -217,7 +221,7 @@ function MatchGame({ contentType, onBack }: { contentType: ContentType; onBack: 
       } else {
         // No match
         setWrongPair(newFlipped)
-        playWrongSound()
+        playAwwSound()
         setTimeout(() => {
           setFlipped([])
           setWrongPair(null)
@@ -302,6 +306,7 @@ function SpellGame({ contentType, onBack }: { contentType: ContentType; onBack: 
   const [score, setScore] = useState(0)
   const [done, setDone] = useState(false)
   const [celebrate, setCelebrate] = useState(false)
+  const [wrong, setWrong] = useState(false)
   const { speakEn } = useSpeech()
   const recordAnswer = useProgressStore(s => s.recordAnswer)
 
@@ -356,7 +361,7 @@ function SpellGame({ contentType, onBack }: { contentType: ContentType; onBack: 
 
     if (answer === target.toLowerCase()) {
       setResult('correct')
-      playCorrectSound()
+      playCheerSound()
       setScore(s => s + 1)
       recordAnswer(correctAnswer, true, contentType === 'words' ? 'word' : 'sentence')
       setTimeout(() => {
@@ -370,7 +375,7 @@ function SpellGame({ contentType, onBack }: { contentType: ContentType; onBack: 
       }, 1200)
     } else if (answer.length >= target.length) {
       setResult('wrong')
-      playWrongSound()
+      playAwwSound()
       recordAnswer(correctAnswer, false, contentType === 'words' ? 'word' : 'sentence')
       setTimeout(() => {
         if (qi + 1 >= TOTAL || qi + 1 >= questions.length) {
