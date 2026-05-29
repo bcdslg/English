@@ -1,0 +1,4 @@
+{
+  "buildCommand": "cd english-app && npm install && npm run build",
+  "outputDirectory": "english-app/dist"
+}
